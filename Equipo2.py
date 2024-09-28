@@ -53,9 +53,7 @@ class Gato:
     def genera_arbol(self,mov,jugador):
         arbolito = Arbol(mov)
         actual = arbolito.raiz
-
         tache_circulo = decide_jugador(jugador+1)
-
         self.tablero[mov[0]]['gatitos'][mov[1]] = tache_circulo
         self._genera_arbol(mov,actual,0, jugador)
         return arbolito
@@ -64,24 +62,16 @@ class Gato:
     def _genera_arbol(self, mov, actual, contador, jugador):
         if contador == 2:
             return
-        
         tache_circulo = decide_jugador(jugador)
-
         movimiento_grande = (mov[1]).upper()
         tablero_actual = self.tablero[movimiento_grande]['gatitos']
-
         for mov_temp,estado in tablero_actual.items():
-            
             if estado == 2:
                 movimiento_total = f'{movimiento_grande}{mov_temp}'
                 actual.hijos[movimiento_total] =  Nodo(movimiento_total, actual)
-
                 self.tablero[movimiento_grande]['gatitos'][mov_temp] = tache_circulo
-
                 self._genera_arbol(movimiento_total, actual.hijos[movimiento_total], contador+1, jugador+1)
-
-                # Backtracking
-                self.tablero[movimiento_grande]['gatitos'][mov_temp] = 2 
+                self.tablero[movimiento_grande]['gatitos'][mov_temp] = 2  # Backtracking
 
 
 mi_gato = Gato()
