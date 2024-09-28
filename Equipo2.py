@@ -30,7 +30,7 @@ class Arbol:
 class Gato:
     # 2: no hay nada, 3: hay tache, 5: hay circulo
     def __init__(self):
-        self.gato={
+        self.tablero={
             letra_mayor:{
                 'estado': 0,
                 'gatitos': {letra_menor: 2 for letra_menor in 'abcdefghi'}
@@ -39,12 +39,12 @@ class Gato:
         }
 
     def mostrar_tablero(self):
-        for letra_mayor, contenido in self.gato.items():
+        for letra_mayor, contenido in self.tablero.items():
             estado = contenido['estado']
             gatitos = contenido['gatitos']
             print(f"{letra_mayor} (estado: {estado}): {gatitos}")
 
-    def decide_jugador(jugador):
+    def decide_jugador(self, jugador):
         if jugador % 2 == 0:
             return 3
         else:
@@ -56,7 +56,7 @@ class Gato:
 
         tache_circulo = decide_jugador(jugador+1)
 
-        self.gato[mov[0]]['gatitos'][mov[1]] = tache_circulo
+        self.tablero[mov[0]]['gatitos'][mov[1]] = tache_circulo
         self._genera_arbol(mov,actual,0, jugador)
         return arbolito
         
@@ -68,7 +68,7 @@ class Gato:
         tache_circulo = decide_jugador(jugador)
 
         movimiento_grande = (mov[1]).upper()
-        tablero_actual = self.gato[movimiento_grande]['gatitos']
+        tablero_actual = self.tablero[movimiento_grande]['gatitos']
 
         for mov_temp,estado in tablero_actual.items():
             
@@ -76,12 +76,12 @@ class Gato:
                 movimiento_total = f'{movimiento_grande}{mov_temp}'
                 actual.hijos[movimiento_total] =  Nodo(movimiento_total, actual)
 
-                self.gato[movimiento_grande]['gatitos'][mov_temp] = tache_circulo
+                self.tablero[movimiento_grande]['gatitos'][mov_temp] = tache_circulo
 
                 self._genera_arbol(movimiento_total, actual.hijos[movimiento_total], contador+1, jugador+1)
 
                 # Backtracking
-                self.gato[movimiento_grande]['gatitos'][mov_temp] = 2 
+                self.tablero[movimiento_grande]['gatitos'][mov_temp] = 2 
 
 
 mi_gato = Gato()
