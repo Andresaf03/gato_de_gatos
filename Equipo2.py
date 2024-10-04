@@ -7,7 +7,7 @@ def decide_jugador(jugador):
 
 def regresa_pos_victoria(pos_victoria, jugador):
     match jugador%2:
-        case 1:
+        case 0:
             match pos_victoria:
                 case 18:
                     return 50 # Dos taches uno vacio
@@ -21,18 +21,18 @@ def regresa_pos_victoria(pos_victoria, jugador):
                     return -3 # Un circulo dos vacios
                 case _:
                     return 0 # Uno de cada uno o linea llena
-        case 0:
+        case 1:
             match pos_victoria:
                 case 18:
-                    return 15 # Dos taches uno vacio
+                    return -15 # Dos taches uno vacio
                 case 50:
-                    return -50 # Dos circulos uno vacio
+                    return 50 # Dos circulos uno vacio
                 case 8:
-                    return -1 # Todo vacio
+                    return 1 # Todo vacio
                 case 12:
-                    return 3 # Un tache dos vacios
+                    return -3 # Un tache dos vacios
                 case 20:
-                    return -3 # Un circulo dos vacios
+                    return 3 # Un circulo dos vacios
                 case _:
                     return 0 # Uno de cada uno o linea llena
 
@@ -53,7 +53,7 @@ class Nodo:
         self.papa = papa
         self.valor = None
         self.movimiento = mov
-        self.es_max = True  # True si es nodo MAX, False si es MIN
+        self.es_max = False  # True si es nodo MAX, False si es MIN
         self.es_hoja = False  # Nuevo atributo para identificar hojas
 
 class Arbol:
@@ -116,7 +116,7 @@ class Gato:
         else:
             return 5
 
-    def analiza_tablero(self, jugador):
+    def analiza_tablero(self, jugador, maquina):
         # Checar si hay posible patron de victoria de los grandes
         peso_array=[]
         for letra in self.tablero.keys():
@@ -129,21 +129,25 @@ class Gato:
                 peso = regresa_pos_victoria(pos_victoria,jugador)
                 pesito_array.append(peso)
             peso_array.append(sum(pesito_array))
-        return sum(peso_array)
 
-    def genera_arbol(self, mov, jugador):
+        if jugador%2 != maquina%2:
+            return -sum(peso_array)
+        else:
+            return sum(peso_array)
+
+    def genera_arbol(self, mov, jugador, maquina):
         arbolito = Arbol(mov)
         actual = arbolito.raiz
-        tache_circulo = self.decide_jugador(jugador+1)
+        tache_circulo = self.decide_jugador(jugador)
         self.tablero[mov[0]]['gatitos'][mov[1]] = tache_circulo
-        self._genera_arbol(mov, actual, 0, jugador)
+        self._genera_arbol(mov, actual, 0, jugador+1, maquina)
         self._minimax(actual, True)
         return arbolito
 
-    def _genera_arbol(self, mov, actual, contador, jugador):
-        if contador == 4 or self._es_gatito_resuelto(mov[0]):
+    def _genera_arbol(self, mov, actual, contador, jugador, maquina):
+        if contador == 2 or self._es_gatito_resuelto(mov[0]):
             actual.es_hoja = True
-            actual.valor = self.analiza_tablero(jugador)
+            actual.valor = self.analiza_tablero(jugador+1, maquina)
             return
 
         tache_circulo = self.decide_jugador(jugador)
@@ -157,13 +161,13 @@ class Gato:
                 actual.hijos[movimiento_total] = Nodo(movimiento_total, actual)
                 actual.hijos[movimiento_total].es_max = not actual.es_max
                 self.tablero[movimiento_grande]['gatitos'][mov_temp] = tache_circulo
-                self._genera_arbol(movimiento_total, actual.hijos[movimiento_total], contador+1, jugador+1)
+                self._genera_arbol(movimiento_total, actual.hijos[movimiento_total], contador+1, jugador+1, maquina)
                 self.tablero[movimiento_grande]['gatitos'][mov_temp] = 2  # Backtracking
                 hijos_generados = True
 
         if not hijos_generados:
             actual.es_hoja = True
-            actual.valor = self.analiza_tablero(jugador)
+            actual.valor = self.analiza_tablero(jugador, maquina)
 
     def _es_gatito_resuelto(self, letra_mayor):
         # Implementa la lógica para determinar si un gatito está resuelto
@@ -197,16 +201,18 @@ class Gato:
 
     def juega(self):
         jugador = int(input("Ingresa que jugador es la maquina: "))
+        maquina = 1
         if jugador == 0:
             self.tablero['A']['gatitos']['a'] = 3
             print("La maquina elige: Aa")
+            maquina = 0
         while not self.cond_victoria():
             self.mostrar_tablero()
             movimiento = input("Movimiento: ")
             while not re.match(r'^[A-I][a-i]$', movimiento):
                 movimiento = input("Movimiento inválido. Intenta de nuevo: ")
 
-            arbol = self.genera_arbol(movimiento, jugador)
+            arbol = self.genera_arbol(movimiento, jugador+1, maquina) # Si maquina es 0: True, Si maquina es 1: False
             mejor_movimiento = max(arbol.raiz.hijos.items(), key=lambda x: x[1].valor)[0]
             print(f"La máquina elige: {mejor_movimiento}")
 
