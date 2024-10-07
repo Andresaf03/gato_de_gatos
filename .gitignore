@@ -1,2 +1,6 @@
 # Ignorar archivos .DS_Store generados por macOS en todos los directorios
 **/.DS_Store
+
+# Ignorar layout y archivos varios
+/layout.html
+/ideas_gato.txt
