@@ -44,6 +44,38 @@ def regresa_pos_victoria(pos_victoria, jugador):
                 case _:
                     return 0 # Uno de cada uno o linea llena
 
+def regresa_pos_victoria_grande(pos_victoria, jugador):
+    match jugador%2:
+        case 0:
+            match pos_victoria:
+                case 18:
+                    return 2 # Dos taches uno vacio
+                case 50:
+                    return 0.5 # Dos circulos uno vacio
+                case 8:
+                    return 1 # Todo vacio
+                case 12:
+                    return 1.2 # Un tache dos vacios
+                case 20:
+                    return 0.75 # Un circulo dos vacios
+                case 30:
+                    return 0.9
+                case _:
+                    return 1 # Uno de cada uno o linea llena
+        case 1:
+            match pos_victoria:
+                case 18:
+                    return 0.5 # Dos taches uno vacio
+                case 50:
+                    return 2 # Dos circulos uno vacio
+                case 8:
+                    return 1 # Todo vacio
+                case 12:
+                    return 0.75 # Un tache dos vacios
+                case 20:
+                    return 1.2 # Un circulo dos vacios
+                case _:
+                    return 1 # Uno de cada uno o linea llena
 
 patrones_de_victoria = [
     ['a', 'b', 'c'],  # Fila 1
@@ -130,14 +162,46 @@ class Gato:
             return -sum(array)
         else:
             return sum(array)
-    
+
+    def pondera_estados_comodin(self, array_estados, jugador):
+        diccionario = {}
+        for i, patron in enumerate(patrones_de_victoria):
+            patron_mayuscula = [letra.upper() for letra in patron]
+            estado = 1
+            for mayuscula in patron_mayuscula:
+                estado *= self.tablero[mayuscula]['estado']
+            peso_ponderador = regresa_pos_victoria_grande(estado, jugador)
+            for mayuscula in patron_mayuscula:
+                if mayuscula not in diccionario:
+                    diccionario[mayuscula] = peso_ponderador
+                else:
+                    diccionario[mayuscula] += peso_ponderador
+
+        for key in diccionario:
+            match key:
+                case 'A', 'C', 'G', 'I':
+                    diccionario[key] /= 3
+                case 'B', 'D', 'F', 'H':
+                    diccionario[key] /= 2
+                case _:
+                    diccionario[key] /= 4
+        resultado = []
+
+        for clave, valor in zip(diccionario.values(), array_estados):
+            resultado.append(clave * valor)
+
+        return resultado
+
+
     def comodin_tablero(self, jugador, maquina):
         # SI ES MAX FULL ATAQUE MIN FULL DEFENSA
         array = self.analiza_tablero_comodin(jugador, maquina)
+        # PONDERAR PESOS ARRAY CON BASE EN LOS PATRONES DE VICTORIA DEL TABLERO GRANDE
+        array_ponderados = self.pondera_estados_comodin(array, jugador)
         if jugador%2 != maquina%2:
-            indice = array.index(min(array))
+            indice = array_ponderados.index(min(array_ponderados))
         else:
-            indice = array.index(max(array))
+            indice = array_ponderados.index(max(array_ponderados))
         return chr(ord('A') + indice)
         
     def analiza_tablero(self, jugador, maquina):
@@ -196,10 +260,12 @@ class Gato:
             mov = letra_big+(letra_big).lower()
             self._genera_arbol(mov, actual, 0, jugador+1, maquina)
             self._minimax(actual, True)
+            # Meter funcion ponderadora para que tome en cuenta todo el gato
         else:
             if not self.cond_victoria():
                 self._genera_arbol(mov, actual, 0, jugador+1, maquina)
                 self._minimax(actual, True)
+                # Meter funcion ponderadora para que tome en cuenta todo el gato
         return arbolito
 
     def _genera_arbol(self, mov, actual, contador, jugador, maquina):
