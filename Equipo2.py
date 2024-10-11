@@ -9,53 +9,54 @@ def regresa_pos_victoria(pos_victoria, jugador):
     match jugador%2:
         case 0:
             match pos_victoria:
+                # Sumando pesos +250
                 case 18:
-                    return 30 # Dos taches uno vacio
+                    return 280 # Dos taches uno vacio
                 case 50:
-                    return -17 # Dos circulos uno vacio
+                    return 233 # Dos circulos uno vacio
                 case 8:
-                    return 1 # Todo vacio
+                    return 251 # Todo vacio
                 case 12:
-                    return 5 # Un tache dos vacios
+                    return 255 # Un tache dos vacios
                 case 20:
-                    return -3 # Un circulo dos vacios
+                    return 247 # Un circulo dos vacios
                 case 125:
-                    return -100
+                    return 150
                 case 27:
-                    return 250
+                    return 500
                 case _:
-                    return 0 # Uno de cada uno o linea llena
+                    return 250 # Uno de cada uno o linea llena
         case 1:
             match pos_victoria:
                 case 18:
-                    return -17 # Dos taches uno vacio
+                    return 233 # Dos taches uno vacio
                 case 50:
-                    return 50 # Dos circulos uno vacio
+                    return 280 # Dos circulos uno vacio
                 case 8:
-                    return 1 # Todo vacio
+                    return 251 # Todo vacio
                 case 12:
-                    return -3 # Un tache dos vacios
+                    return 247 # Un tache dos vacios
                 case 20:
-                    return 5 # Un circulo dos vacios
+                    return 255 # Un circulo dos vacios
                 case 125:
-                    return 250
+                    return 500
                 case 27:
-                    return -100
+                    return 150
                 case _:
-                    return 0 # Uno de cada uno o linea llena
+                    return 250 # Uno de cada uno o linea llena
 
 def regresa_pos_victoria_grande(pos_victoria, jugador):
     match jugador%2:
         case 0:
             match pos_victoria:
                 case 18:
-                    return 2 # Dos taches uno vacio
+                    return 5 # Dos taches uno vacio
                 case 50:
                     return 0.5 # Dos circulos uno vacio
                 case 8:
                     return 1 # Todo vacio
                 case 12:
-                    return 1.2 # Un tache dos vacios
+                    return 2 # Un tache dos vacios
                 case 20:
                     return 0.75 # Un circulo dos vacios
                 case 30:
@@ -67,13 +68,13 @@ def regresa_pos_victoria_grande(pos_victoria, jugador):
                 case 18:
                     return 0.5 # Dos taches uno vacio
                 case 50:
-                    return 2 # Dos circulos uno vacio
+                    return 5 # Dos circulos uno vacio
                 case 8:
                     return 1 # Todo vacio
                 case 12:
                     return 0.75 # Un tache dos vacios
                 case 20:
-                    return 1.2 # Un circulo dos vacios
+                    return 2 # Un circulo dos vacios
                 case _:
                     return 1 # Uno de cada uno o linea llena
 
@@ -158,10 +159,11 @@ class Gato:
     
     def suma_tablero(self, jugador, maquina):
         array = self.analiza_tablero(jugador, maquina)
+        array_ponderado = self.pondera_estados_comodin(array, jugador)
         if jugador%2 != maquina%2:
-            return -sum(array)
+            return -sum(array_ponderado)
         else:
-            return sum(array)
+            return sum(array_ponderado)
 
     def pondera_estados_comodin(self, array_estados, jugador):
         diccionario = {}
@@ -203,6 +205,9 @@ class Gato:
         else:
             indice = array_ponderados.index(max(array_ponderados))
         return chr(ord('A') + indice)
+    
+    def castiga_comodin(self):
+        pass
         
     def analiza_tablero(self, jugador, maquina):
         # Checar si hay posible patron de victoria de los grandes
@@ -260,16 +265,18 @@ class Gato:
             mov = letra_big+(letra_big).lower()
             self._genera_arbol(mov, actual, 0, jugador+1, maquina)
             self._minimax(actual, True)
-            # Meter funcion ponderadora para que tome en cuenta todo el gato
+            
         else:
             if not self.cond_victoria():
                 self._genera_arbol(mov, actual, 0, jugador+1, maquina)
                 self._minimax(actual, True)
-                # Meter funcion ponderadora para que tome en cuenta todo el gato
+                
         return arbolito
+    
+    # Algoritmo para determinar la depth basado en el turno
 
     def _genera_arbol(self, mov, actual, contador, jugador, maquina):
-        if contador == 3 or (self._es_gatito_resuelto(mov[0]) and contador !=0):
+        if contador == 6 or (self._es_gatito_resuelto(mov[0]) and contador !=0):
             actual.es_hoja = True
             actual.valor = self.suma_tablero(jugador+1, maquina)
             return
@@ -351,7 +358,12 @@ class Gato:
 
             arbol = self.genera_arbol(movimiento, jugador+1, maquina) # Si maquina es 0: True, Si maquina es 1: False
             self.actualiza_letra_mayor(movimiento[0])
-            if len(arbol.raiz.hijos) != 0:
+            if len(arbol.raiz.hijos) != 0 and not self.cond_victoria():
+                for hijo in arbol.raiz.hijos.values():
+                    movimiento = hijo.movimiento[1].upper()
+                    if self._es_gatito_resuelto(movimiento):
+                        hijo.valor = (hijo.valor)*(0.3)
+                    
                 # Obtiene el máximo de la lista (de los items), comparando cada x por su segundo atributo (valor) que es el estado y regresando la llave [0] maxima
                 mejor_movimiento = max(arbol.raiz.hijos.items(), key=lambda x: x[1].valor)[0]
                 print(f"La máquina elige: {mejor_movimiento}")
