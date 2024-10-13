@@ -10,72 +10,102 @@ def regresa_pos_victoria(pos_victoria, maquina):
         case 0:  # Para el jugador que usa X (taches)
             match pos_victoria:
                 case 18:
-                    return 750  # Dos X, uno vacío (aumentado para priorizar ganar)
+                    return 900  # Dos X, uno vacío 
                 case 50:
-                    return 150  # Dos O, uno vacío (reducido para enfocarse en bloquear solo si es necesario)
+                    return 150  # Dos O, uno vacío 
                 case 8:
-                    return 500  # Todo vacío (reducido para no priorizar casillas vacías)
+                    return 500  # Todo vacío 
                 case 12:
-                    return 600  # Un X, dos vacíos (aumentado para fomentar líneas potenciales)
+                    return 750  # Un X, dos vacíos 
                 case 20:
-                    return 250  # Un O, dos vacíos (ajustado para bloquear si es necesario)
+                    return 300  # Un O, dos vacíos 
                 case 125:
-                    return 50  # Tres O (poco valor, ya está perdido)
+                    return 1  # Tres O 
                 case 27:
-                    return 1250  # Tres X (máxima prioridad, victoria)
+                    return 3000  # Tres X 
+                case 30:
+                    return 495 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
+                case 45:
+                    return 500 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
+                case 75: 
+                    return 500 # Dos O, un X (cerraste la amenaza)
                 case _:
-                    return 515  # Otros casos (mantenido como base)
+                    return 500  # Mantenido como control
         case 1:  # Para el jugador que usa O (círculos)
             match pos_victoria:
                 case 18:
-                    return 150  # Dos X, uno vacío (ajustado para bloquear si es necesario)
+                    return 150  # Dos X, uno vacío 
                 case 50:
-                    return 750  # Dos O, uno vacío (aumentado para priorizar ganar)
+                    return 900  # Dos O, uno vacío 
                 case 8:
-                    return 500  # Todo vacío (reducido para no priorizar casillas vacías)
+                    return 500  # Todo vacío 
                 case 12:
-                    return 250  # Un X, dos vacíos (ajustado para bloquear si es necesario)
+                    return 300  # Un X, dos vacíos 
                 case 20:
-                    return 600  # Un O, dos vacíos (aumentado para fomentar líneas potenciales)
+                    return 750  # Un O, dos vacíos 
                 case 125:
-                    return 1250  # Tres O (máxima prioridad, victoria)
+                    return 3000  # Tres O 
                 case 27:
-                    return 50  # Tres X (poco valor, ya está perdido)
+                    return 1  # Tres X
+                case 30:
+                    return 505 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
+                case 45:
+                    return 500 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
+                case 75: 
+                    return 500 # Dos O, un X (cerraste la amenaza)
                 case _:
-                    return 515  # Otros casos (mantenido como base)
+                    return 500  # Mantenido como control
 
 def regresa_pos_victoria_grande(pos_victoria, maquina):
     match maquina%2:
         case 0:
             match pos_victoria:
                 case 18:
-                    return 5 # Dos taches uno vacio
+                    return 15 # Dos taches uno vacio
                 case 50:
-                    return 0.5 # Dos circulos uno vacio
+                    return 0.1 # Dos circulos uno vacio
                 case 8:
                     return 1 # Todo vacio
                 case 12:
-                    return 2 # Un tache dos vacios
+                    return 4 # Un tache dos vacios
                 case 20:
-                    return 0.75 # Un circulo dos vacios
+                    return 0.5 # Un circulo dos vacios
+                case 27:
+                    return 100 # Tres taches
+                case 125:
+                    return 0 # Tres circulos
                 case 30:
-                    return 0.9
+                    return 0.99 # Un X, un O, un vacío 
+                case 45:
+                    return 1 # Dos X, un O 
+                case 75: 
+                    return 1 # Dos O, un X 
                 case _:
-                    return 1 # Uno de cada uno o linea llena
+                    return 1 # Control
         case 1:
             match pos_victoria:
                 case 18:
-                    return 0.5 # Dos taches uno vacio
+                    return 0.1 # Dos taches uno vacio
                 case 50:
-                    return 5 # Dos circulos uno vacio
+                    return 15 # Dos circulos uno vacio
                 case 8:
                     return 1 # Todo vacio
                 case 12:
-                    return 0.75 # Un tache dos vacios
+                    return 0.5 # Un tache dos vacios
                 case 20:
-                    return 2 # Un circulo dos vacios
+                    return 4 # Un circulo dos vacios
+                case 27:
+                    return 0 # Tres taches
+                case 125:
+                    return 100 # Tres circulos
+                case 30:
+                    return 1.01 # Un X, un O, un vacío 
+                case 45:
+                    return 1 # Dos X, un O 
+                case 75: 
+                    return 1 # Dos O, un X 
                 case _:
-                    return 1 # Uno de cada uno o linea llena
+                    return 1 # Control
 
 patrones_de_victoria = [
     ['a', 'b', 'c'],  # Fila 1
@@ -358,7 +388,7 @@ class Gato:
                 for hijo in arbol.raiz.hijos.values():
                     movimiento = hijo.movimiento[1].upper()
                     if self._es_gatito_resuelto(movimiento):
-                        hijo.valor = (hijo.valor)*(0.3)
+                        hijo.valor = (hijo.valor)*(0.08)
                     
                 # Obtiene el máximo de la lista (de los items), comparando cada x por su segundo atributo (valor) que es el estado y regresando la llave [0] maxima
                 mejor_movimiento = max(arbol.raiz.hijos.items(), key=lambda x: x[1].valor)[0]
