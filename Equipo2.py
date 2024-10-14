@@ -10,51 +10,51 @@ def regresa_pos_victoria(pos_victoria, maquina):
         case 0:  # Para el jugador que usa X (taches)
             match pos_victoria:
                 case 18:
-                    return 900  # Dos X, uno vacío 
+                    return 2500  # Dos X, uno vacío 
                 case 50:
-                    return 150  # Dos O, uno vacío 
+                    return 100  # Dos O, uno vacío 
                 case 8:
-                    return 500  # Todo vacío 
+                    return 1000  # Todo vacío 
                 case 12:
-                    return 750  # Un X, dos vacíos 
+                    return 1500  # Un X, dos vacíos 
                 case 20:
                     return 300  # Un O, dos vacíos 
                 case 125:
                     return 1  # Tres O 
                 case 27:
-                    return 2800  # Tres X 
+                    return 7500  # Tres X 
                 case 30:
-                    return 495 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
+                    return 800 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
                 case 45:
-                    return 500 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
+                    return 1000 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
                 case 75: 
-                    return 500 # Dos O, un X (cerraste la amenaza)
+                    return 1000 # Dos O, un X (cerraste la amenaza)
                 case _:
-                    return 500  # Mantenido como control
+                    return 1000  # Mantenido como control
         case 1:  # Para el jugador que usa O (círculos)
             match pos_victoria:
                 case 18:
-                    return 150  # Dos X, uno vacío 
+                    return 100  # Dos X, uno vacío 
                 case 50:
-                    return 900  # Dos O, uno vacío 
+                    return 2500  # Dos O, uno vacío 
                 case 8:
-                    return 500  # Todo vacío 
+                    return 1000  # Todo vacío 
                 case 12:
                     return 300  # Un X, dos vacíos 
                 case 20:
-                    return 750  # Un O, dos vacíos 
+                    return 1500  # Un O, dos vacíos 
                 case 125:
-                    return 2800  # Tres O 
+                    return 7500  # Tres O 
                 case 27:
                     return 1  # Tres X
                 case 30:
-                    return 505 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
+                    return 1250 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
                 case 45:
-                    return 500 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
+                    return 1000 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
                 case 75: 
-                    return 500 # Dos O, un X (cerraste la amenaza)
+                    return 1000 # Dos O, un X (cerraste la amenaza)
                 case _:
-                    return 500  # Mantenido como control
+                    return 1000  # Mantenido como control
 
 def regresa_pos_victoria_grande(pos_victoria, maquina):
     match maquina%2:
@@ -71,7 +71,7 @@ def regresa_pos_victoria_grande(pos_victoria, maquina):
                 case 20:
                     return 0.5 # Un circulo dos vacios
                 case 27:
-                    return 1000 # Tres taches
+                    return 10000 # Tres taches
                 case 125:
                     return 0 # Tres circulos
                 case 30:
@@ -97,7 +97,7 @@ def regresa_pos_victoria_grande(pos_victoria, maquina):
                 case 27:
                     return 0 # Tres taches
                 case 125:
-                    return 1000 # Tres circulos
+                    return 10000 # Tres circulos
                 case 30:
                     return 1.01 # Un X, un O, un vacío 
                 case 45:
@@ -188,14 +188,14 @@ class Gato:
         else:
             return 5
     
-    def suma_tablero(self, jugador, maquina):
-        array = self.analiza_tablero(jugador, maquina)
+    def suma_tablero(self, maquina):
+        array = self.analiza_tablero(maquina)
         array_ponderado = self.pondera_estados_comodin(array, maquina)
         return sum(array_ponderado)
 
     def pondera_estados_comodin(self, array_estados, maquina):
         diccionario = {}
-        for i, patron in enumerate(patrones_de_victoria):
+        for patron in patrones_de_victoria:
             patron_mayuscula = [letra.upper() for letra in patron]
             estado = 1
             for mayuscula in patron_mayuscula:
@@ -233,30 +233,20 @@ class Gato:
         else:
             indice = array_ponderados.index(max(array_ponderados))
         return chr(ord('A') + indice)
-    
-    def castiga_comodin(self):
-        pass
         
-    def analiza_tablero(self, jugador, maquina):
+    def analiza_tablero(self, maquina):
         # Checar si hay posible patron de victoria de los grandes
         peso_array=[]
         for letra in self.tablero.keys():
-        
-            if self._es_gatito_resuelto(letra):
-                if jugador%2 == maquina%2:
-                    peso_array.append(float('inf'))
-                else:
-                    peso_array.append(float('-inf'))
-            else:
-                gatito = self.tablero[letra]['gatitos']
-                pesito_array=[]
-                for patron in patrones_de_victoria:
-                    pos_victoria = 1
-                    for i in range(3):
-                        pos_victoria *= gatito[patron[i]]
-                    peso = regresa_pos_victoria(pos_victoria,maquina)
-                    pesito_array.append(peso)
-                peso_array.append(sum(pesito_array))
+            gatito = self.tablero[letra]['gatitos']
+            pesito_array=[]
+            for patron in patrones_de_victoria:
+                pos_victoria = 1
+                for i in range(3):
+                    pos_victoria *= gatito[patron[i]]
+                peso = regresa_pos_victoria(pos_victoria,maquina)
+                pesito_array.append(peso)
+            peso_array.append(sum(pesito_array))
         return peso_array
 
     def analiza_tablero_comodin(self, jugador, maquina):
@@ -305,7 +295,7 @@ class Gato:
     def _genera_arbol(self, mov, actual, contador, jugador, maquina, profundidad):
         if contador == profundidad or (self._es_gatito_resuelto(mov[0]) and contador !=0):
             actual.es_hoja = True
-            actual.valor = self.suma_tablero(jugador+1, maquina)
+            actual.valor = self.suma_tablero(maquina)
             return
 
         tache_circulo = self.decide_jugador(jugador)
@@ -325,7 +315,7 @@ class Gato:
 
         if not hijos_generados:
             actual.es_hoja = True
-            actual.valor = self.suma_tablero(jugador, maquina)
+            actual.valor = self.suma_tablero(maquina)
             
         # Algoritmo para determinar la depth basado en el turno
     def calcular_profundidad(self, jugador):
@@ -407,7 +397,7 @@ class Gato:
                 for hijo in arbol.raiz.hijos.values():
                     movimiento = hijo.movimiento[1].upper()
                     if self._es_gatito_resuelto(movimiento):
-                        hijo.valor = (hijo.valor)*(0.08)
+                        hijo.valor = (hijo.valor)*(0.05)
                     
                 # Obtiene el máximo de la lista (de los items), comparando cada x por su segundo atributo (valor) que es el estado y regresando la llave [0] maxima
                 mejor_movimiento = max(arbol.raiz.hijos.items(), key=lambda x: x[1].valor)[0]
