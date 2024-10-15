@@ -47,9 +47,9 @@ def calcula_peso_patron(estado_patron, maquina):
                 case 30:
                     return 2400 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con profundidad impar).
                 case 45:
-                    return 2900 # Dos X, un O (te bloquearon).
+                    return 2900 # Dos X, un O (cerraste la amenaza).
                 case 75: 
-                    return 1500 # Dos O, un X (cerraste la amenaza).
+                    return 1500 # Dos O, un X (te bloquearon).
                 case _:
                     return 2000 # Mantenido como control.
                 
@@ -57,22 +57,22 @@ def calcula_peso_patron(estado_patron, maquina):
 # Entrada: estado_patron (int), maquina (int), salida: peso_ponderador (int) positivo.
 def calcula_peso_patron_grande(estado_patron, maquina):
     match maquina%2:
-        case 0:
+        case 0: # Para el jugador que usa X (tachces).
             match estado_patron:
                 case 18:
-                    return 15 # Dos taches uno vacío.
+                    return 15 # Dos X uno vacío.
                 case 50:
-                    return 0.07 # Dos circulos uno vacío.
+                    return 0.07 # Dos O uno vacío.
                 case 8:
                     return 1 # Todo vacío.
                 case 12:
-                    return 4 # Un tache dos vacíos.
+                    return 4 # Un X, dos vacíos.
                 case 20:
-                    return 0.25 # Un circulo dos vacíos.
+                    return 0.25 # Un O, dos vacíos.
                 case 27:
-                    return 10000 # Tres taches.
+                    return 10000 # Tres X.
                 case 125:
-                    return 0 # Tres circulos.
+                    return 0 # Tres O.
                 case 30:
                     return 0.99 # Un X, un O, un vacío.
                 case 45:
@@ -81,22 +81,22 @@ def calcula_peso_patron_grande(estado_patron, maquina):
                     return 1.05 # Dos O, un X.
                 case _:
                     return 1 # Control.
-        case 1:
+        case 1: # Para el jugador que usa O (círculos).
             match estado_patron:
                 case 18:
-                    return 0.07 # Dos taches uno vacío.
+                    return 0.07 # Dos X, uno vacío.
                 case 50:
-                    return 15 # Dos circulos uno vacío.
+                    return 15 # Dos O, uno vacío.
                 case 8:
                     return 1 # Todo vacío.
                 case 12:
-                    return 0.25 # Un tache dos vacíos.
+                    return 0.25 # Un X, dos vacíos.
                 case 20:
-                    return 4 # Un circulo dos vacíos.
+                    return 4 # Un O, dos vacíos.
                 case 27:
-                    return 0 # Tres taches.
+                    return 0 # Tres X.
                 case 125:
-                    return 10000 # Tres circulos.
+                    return 10000 # Tres O.
                 case 30:
                     return 0.99 # Un X, un O, un vacío.
                 case 45:
@@ -138,7 +138,7 @@ class Arbol:
         self.raiz = Nodo(mov)
         self.nivel = 0
 
-    # Método para imprimir el árbol de decisión para depurar y observar el comportamiento del algoritmo Minimax.
+    # Método para imprimir el árbol de decisión, usado para depurar y observar el comportamiento del algoritmo Minimax.
     # Entrada: nodo_actual (Nodo), nivel (int), salida: impresión de los nodos del árbol.
     def imprimir_arbol(self, nodo_actual=None, nivel=0):
         if nodo_actual is None:
@@ -151,8 +151,8 @@ class Arbol:
 
 # Clase Gato para el juego del gato_de_gatos, contiene la lógica del juego y el algoritmo Minimax.
 class Gato:
-    # Constructor de la clase Gato, inicializa el tablero de gato_de_gatos con un diccionario de diccionarios, todo vacío, 
-    # los estados son 2: no hay nada, 3: hay tache, 5: hay circulo.
+    # Constructor de la clase Gato, inicializa el tablero de gato_de_gatos con un diccionario de diccionarios, todo vacío:
+    # los estados son 2: no hay nada, 3: hay tache, 5: hay círculo.
     # Las claves exteriores (A-I) son las letras mayúsculas que representan los 9 sub-tableros
     # y las claves interiores (a-i) son las letras minúsculas que representan las casillas de los sub-tableros.
     def __init__(self):
@@ -178,7 +178,7 @@ class Gato:
         todos_diferentes_de_2 = all(self.tablero[letra_grande]['estado'] != 2 for letra_grande in 'ABCDEFGHI')
         return todos_diferentes_de_2
 
-    # Método para mostrar el tablero del gato_de_gatos, imprime el tablero con los taches, círculos o si está vacío.
+    # Método para mostrar el tablero del gato_de_gatos, imprime el tablero con los taches, círculos o si está vacío un '-'.
     # Entrada: self que contiene el tablero actualizado, salida: impresión del tablero.
     def mostrar_tablero(self):
         print(" +-------+-------+-------+")
@@ -198,7 +198,7 @@ class Gato:
                 print()
             print(" +-------+-------+-------+")
 
-    # Función para decidir si el jugador es X o O, parámetro: jugador (número par o impar) .
+    # Función para decidir si el jugador es X o O, parámetro: jugador (número par o impar).
     # Entrada: jugador (int), salida: 3 (si es par) o 5 (si es impar).
     def decide_jugador(self, jugador): 
             if jugador % 2 == 0:
@@ -290,7 +290,7 @@ class Gato:
             return peso_arreglo
 
     # Función para determinar los valores de los subtableros para posteriormente analizar cual se elegirá, 
-    # dado que nos envían a un subtablero resuelto (comodí ), parámetros: jugador (int) positivo, maquina (int) 0 o 1 si es X o O respectivamente.
+    # dado que nos envían a un subtablero resuelto (comodín), parámetros: jugador (int) positivo, maquina (int) 0 o 1 si es X o O respectivamente.
     # Entrada: jugador (int) positivo, maquina (int) 0/1, salida: peso_arreglo (lista) de los valores de los subtableros.
     def analiza_tablero_comodin(self, jugador, maquina):
         peso_arreglo=[]
@@ -355,13 +355,13 @@ class Gato:
         hijos_generados = False # No ha generado los hijos en la recursión.
         for mov_temp, estado in tablero_actual.items(): # Para cada movimiento posible y su estado (X, O o vacío).
             if estado == 2: # Si la casilla está vacía.
-                movimiento_total = f'{movimiento_grande}{mov_temp}' # Componer el movimiento total
+                movimiento_total = f'{movimiento_grande}{mov_temp}' # Componer el movimiento total.
                 actual.hijos[movimiento_total] = Nodo(movimiento_total, actual) # Hacer un nodo hijo con el movimiento total.
                 actual.hijos[movimiento_total].es_max = not actual.es_max # Cambiar el nivel del nodo hijo (si tiene que minimizar o maximizar).
                 self.tablero[movimiento_grande]['gatitos'][mov_temp] = tache_circulo # Realizar el movimiento.
                 self.actualiza_letra_mayor(movimiento_grande) # Llamar a la función para actualizar el estado del subtablero si es que cambia.
                 self._genera_arbol(movimiento_total, actual.hijos[movimiento_total], contador+1, jugador+1, maquina, profundidad) # Llamar a la recursión, agregando un nivel y variando un turno.
-                self.tablero[movimiento_grande]['gatitos'][mov_temp] = 2  # Backtracking para no alterar los subtableros (sus casillas) en la recursión, es decir que cada rama tenga solo los movimientos que se realizaron en ella.
+                self.tablero[movimiento_grande]['gatitos'][mov_temp] = 2  # Backtracking para no alterar las casillas de los subtableros en la recursión, es decir que cada rama tenga solo los movimientos que se realizaron en ella.
                 self.actualiza_letra_mayor(movimiento_grande) # Backtracking para no modificar los estados de los subtableros entre diferentes ramas.
                 hijos_generados = True # Se generaron hijos en la recursión.
 
@@ -386,30 +386,30 @@ class Gato:
     # Método para determinar si un gatito (subtablero) está resuelto, parámetro: letra_mayor (str).
     # Entrada: letra_mayor (str), salida: boolean, True si está resuelto, False si no lo está.
     def _es_gatito_resuelto(self, letra_mayor):
-        gatito = self.tablero[letra_mayor]['gatitos'] # Obtener el diccionario con las llaves y estados
-        # Verificar si hay un ganador
+        gatito = self.tablero[letra_mayor]['gatitos'] # Obtener el diccionario con las llaves y estados.
+        # Verificar si hay un ganador.
         for patron in patrones_de_victoria:
             if all(gatito[pos] == 3 for pos in patron) or all(gatito[pos] == 5 for pos in patron):
                 return True
-        # Verificar si está lleno (gato)
+        # Verificar si está lleno (gato).
         return all(valor != 2 for valor in gatito.values())
 
     # Método para actualizar el estado de un gatito (subtablero) y determinar si está resuelto, parámetro: letra_mayor (str).
     # Entrada: letra_mayor (str) que representa un subtablero, salida: no hay, es la actualización del tablero.
     def actualiza_letra_mayor(self, letra_mayor):
-        gatito = self.tablero[letra_mayor]['gatitos'] # Obtener el diccionario con las llaves y estados
+        gatito = self.tablero[letra_mayor]['gatitos'] # Obtener el diccionario con las llaves y estados.
         bandera = False
-        # Verificar si hay un ganador
+        # Verificar si hay un ganador.
         for patron in patrones_de_victoria: # Obtener los patrones de victoria.
-            if all(gatito[pos] == 3 for pos in patron): # Si está ganado por X
+            if all(gatito[pos] == 3 for pos in patron): # Si está ganado por X.
                 self.tablero[letra_mayor]['estado'] = 3
-                bandera = True # Para el backtracking
-            elif all(gatito[pos] == 5 for pos in patron): # Si está ganado por O
+                bandera = True # Para el backtracking.
+            elif all(gatito[pos] == 5 for pos in patron): # Si está ganado por O.
                 self.tablero[letra_mayor]['estado'] = 5
                 bandera = True # Para el backtracking
-        if all(valor != 2 for valor in gatito.values()): # Si está lleno (gato)
-            self.tablero[letra_mayor]['estado'] = 1 # El tablero esta lleno y nadie gano (Gato)
-            bandera = True # Para el backtracking
+        if all(valor != 2 for valor in gatito.values()): # Si está lleno (gato).
+            self.tablero[letra_mayor]['estado'] = 1 # El tablero esta lleno y nadie gano (Gato).
+            bandera = True # Para el backtracking.
         if bandera == False: # Si no se actualiza el estado en la función, regresar el valor a 2 (backtracking).
             self.tablero[letra_mayor]['estado'] = 2
     
@@ -480,6 +480,7 @@ class Gato:
 
         print("¡Juego terminado!") # Comunicar que el juego ha terminado.
         self.mostrar_tablero() # Mostrar el tablero final.
+
 
 mi_gato = Gato() # Instanciamos un gato para poder jugar.
 mi_gato.juega() # Llamamos al método juega para comenzar el juego.
