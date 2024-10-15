@@ -14,7 +14,7 @@ def regresa_pos_victoria(pos_victoria, maquina):
                 case 50:
                     return 100  # Dos O, uno vacío 
                 case 8:
-                    return 2000  # Todo vacío 
+                    return 2750  # Todo vacío 
                 case 12:
                     return 3000  # Un X, dos vacíos 
                 case 20:
@@ -22,13 +22,13 @@ def regresa_pos_victoria(pos_victoria, maquina):
                 case 125:
                     return 1  # Tres O 
                 case 27:
-                    return 15000  # Tres X 
+                    return 10000  # Tres X 
                 case 30:
-                    return 1800 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
+                    return 2400 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
                 case 45:
-                    return 2000 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
+                    return 1500 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
                 case 75: 
-                    return 2000 # Dos O, un X (cerraste la amenaza)
+                    return 2900 # Dos O, un X (cerraste la amenaza)
                 case _:
                     return 2000  # Mantenido como control
         case 1:  # Para el jugador que usa O (círculos)
@@ -38,23 +38,23 @@ def regresa_pos_victoria(pos_victoria, maquina):
                 case 50:
                     return 5000  # Dos O, uno vacío 
                 case 8:
-                    return 2000  # Todo vacío 
+                    return 1500  # Todo vacío 
                 case 12:
                     return 300  # Un X, dos vacíos 
                 case 20:
                     return 3000  # Un O, dos vacíos 
                 case 125:
-                    return 15000  # Tres O 
+                    return 10000  # Tres O 
                 case 27:
                     return 1  # Tres X
                 case 30:
                     return 2400 # Un X, un O, un vacío (ligeramente peor, no es tu turno para mover con prof impar)
                 case 45:
-                    return 2000 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
+                    return 2900 # Dos X, un O (te bloquearon pero posiblemente hay más juego) 
                 case 75: 
-                    return 2000 # Dos O, un X (cerraste la amenaza)
+                    return 1500 # Dos O, un X (cerraste la amenaza)
                 case _:
-                    return 2000  # Mantenido como control
+                    return 2000 # Mantenido como control
 
 def regresa_pos_victoria_grande(pos_victoria, maquina):
     match maquina%2:
@@ -235,19 +235,33 @@ class Gato:
         return chr(ord('A') + indice)
         
     def analiza_tablero(self, maquina):
-        # Checar si hay posible patron de victoria de los grandes
-        peso_array=[]
-        for letra in self.tablero.keys():
-            gatito = self.tablero[letra]['gatitos']
-            pesito_array=[]
-            for patron in patrones_de_victoria:
-                pos_victoria = 1
-                for i in range(3):
-                    pos_victoria *= gatito[patron[i]]
-                peso = regresa_pos_victoria(pos_victoria,maquina)
-                pesito_array.append(peso)
-            peso_array.append(sum(pesito_array))
-        return peso_array
+            # Checar si hay posible patron de victoria de los grandes
+            peso_array=[]
+            for letra in self.tablero.keys():
+                gatito = self.tablero[letra]['gatitos']
+                diccionario = {}
+                for patron in patrones_de_victoria:
+                    pos_victoria = 1
+                    for minuscula in patron:
+                        pos_victoria *= gatito[minuscula]
+                    peso = regresa_pos_victoria(pos_victoria,maquina)
+                    for minuscula in patron:
+                        if minuscula not in diccionario:
+                            diccionario[minuscula] = peso
+                        else:
+                            diccionario[minuscula] += peso
+                suma = 0
+                for key in diccionario:
+                    if key in ('a', 'c', 'g', 'i'):
+                        diccionario[key] /= 3
+                    elif key in ('b', 'd', 'f', 'h'):
+                        diccionario[key] /= 0.8
+                    else:
+                        diccionario[key] /= 4
+                    suma += diccionario[key]
+                peso_array.append(suma)
+
+            return peso_array
 
     def analiza_tablero_comodin(self, jugador, maquina):
         # Checar si hay posible patron de victoria de los grandes
@@ -321,11 +335,11 @@ class Gato:
             
         # Algoritmo para determinar la depth basado en el turno
     def calcular_profundidad(self, jugador):
-        if jugador <= 25:
+        if jugador <= 30:
             profundidad = 5
-        elif jugador <= 35:
-            profundidad = 7
         elif jugador <= 45:
+            profundidad = 7
+        elif jugador <= 65:
             profundidad = 9
         else:
             profundidad = 11
@@ -389,8 +403,8 @@ class Gato:
         jugador = int(input("Ingresa que jugador es la maquina: "))
         maquina = 1
         if jugador == 0:
-            self.tablero['A']['gatitos']['a'] = 3
-            print("La maquina elige: Aa")
+            self.tablero['E']['gatitos']['e'] = 3
+            print("La maquina elige: Ee")
             maquina = 0
         while not self.cond_victoria():
             self.mostrar_tablero()
@@ -404,7 +418,9 @@ class Gato:
                 for hijo in arbol.raiz.hijos.values():
                     movimiento = hijo.movimiento[1].upper()
                     if self._es_gatito_resuelto(movimiento):
-                        hijo.valor = (hijo.valor)*(0.01)
+                        hijo.valor = (hijo.valor)*(0.1)
+                    if hijo.movimiento[1] == 'e':
+                        hijo.valor = hijo.valor * (0.85)
                     if hijo.papa.movimiento[0] == hijo.movimiento[1].upper():
                         hijo.valor = (hijo.valor)*(0.99)
                     
