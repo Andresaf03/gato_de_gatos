@@ -33,7 +33,60 @@ Cada célula se representa por una letra mayúscula {A-I} y cada casilla de un g
 La solución consiste en un archivo `.py` que, al ejecutarlo, podemos interactuar, mediante la terminal, para llevar a cabo el juego. Este archivo `.py` llamado `Equipo2.py` no contiene librerías importadas y está basado en la última versión de Python `Python 3.12.3`.
 
 ## Clases
+#### Nodo
+Clase que ayudará a componer el árbol de decisión para posteriormente realizar un algoritmo de Minimax. Esta clase tiene como atributos: hijos, papa, valor (movimiento en el tablero), es_max y es_hoja.
+
+#### Arbol
+Clase que compondrá el árbol de decisión a partir de elementos de la clase Nodo para poder realizar un algoritmo de Minimax.
+
+#### Gato
+Clase que compone toda la lógica (y funciones) para realizar un juego de gato_de_gatos o "Ultimate Tic-Tac-Toe".
 
 ## Funciones
+#### calcula_peso_patron(estado_patron, maquina)
+Calcula el peso de un patrón de victoria dentro de un gatito (subtablero). Recibe el estado del patrón y si la máquina es X (0) o O (1), y devuelve un peso positivo.
 
-## Constantes
+#### calcula_peso_patron_grande(estado_patron, maquina)
+Calcula el peso de un patrón de victoria del tablero grande para ponderar los pesos. Similar a calcula_peso_patron, pero para el tablero completo.
+
+#### Gato.decide_jugador(jugador)
+Decide si el jugador es X o O. Recibe un número par o impar y devuelve 3 (si es par, X) o 5 (si es impar, O).
+
+#### Gato.suma_tablero(maquina)
+Determina una puntuación para el estado actual del tablero. Combina las evaluaciones de todos los subtableros y las relaciones en el tablero grande.
+
+#### Gato.pondera_estados(arreglo_estados, maquina)
+Pondera los estados de los subtableros con base en los patrones de victoria del tablero grande.
+
+#### Gato.comodin_tablero(jugador, maquina)
+Determina el mejor movimiento en el tablero grande cuando nos han mandado a un subtablero resuelto (comodín).
+
+#### Gato.analiza_tablero(maquina)
+Analiza los subtableros y determina los valores de los mismos, basado en los patrones de victoria.
+
+#### Gato.analiza_tablero_comodin(jugador, maquina)
+Determina los valores de los subtableros para posteriormente analizar cuál se elegirá, dado que nos envían a un subtablero resuelto (comodín).
+
+#### Gato.genera_arbol(mov, jugador, maquina)
+Genera el árbol de decisión para el algoritmo Minimax. Realiza el movimiento recibido del jugador y genera los hijos.
+
+#### Gato._genera_arbol(mov, actual, contador, jugador, maquina, profundidad)
+Método privado para generar el árbol de decisión recursivamente, alternando entre los turnos de X y O.
+
+#### Gato.calcular_profundidad(jugador)
+Determina la profundidad del árbol basado en el turno actual del juego.
+
+#### Gato._es_gatito_resuelto(letra_mayor)
+Determina si un gatito (subtablero) está resuelto.
+
+#### Gato.actualiza_letra_mayor(letra_mayor)
+Actualiza el estado de un gatito (subtablero) y determina si está resuelto.
+
+#### Gato.actualiza_tablero()
+Actualiza el tablero completo, determinando si cada gatito (subtablero) está resuelto y actualizando su estado.
+
+#### Gato._minimax(nodo, es_max)
+Aplica el algoritmo Minimax para determinar el mejor movimiento de la máquina.
+
+#### Gato.juega()
+Método principal para jugar el juego del gato_de_gatos. Maneja la interacción con el usuario, muestra el tablero, y coordina los movimientos del jugador y la máquina hasta que el juego termina.
